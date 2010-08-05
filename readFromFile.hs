@@ -3,7 +3,7 @@ module Main where
 import qualified Data.ByteString.Lazy as BL
 import System.Environment
 
-import Kainoa.ResultTbl (openResultTbl, getText, getTargets, getResultsForTarget)
+import Kainoa.ResultTbl (openResultTbl, getPop, getText, getTargets, getResultsForTarget)
 import Kainoa.Types
 
 main = do
@@ -12,10 +12,15 @@ main = do
 
   resultTbl <- openResultTbl "idx/games"
 
-  putStrLn "text:"
+  putStrLn "pop:"
+  case getPop resultTbl id of
+    Just p  -> putStrLn $ show p
+    Nothing -> putStrLn "none"
+
+  putStrLn "\ntext:"
   case getText resultTbl id of
     Just s  -> BL.putStrLn s
-    Nothing -> putStrLn "not found"
+    Nothing -> putStrLn "none"
 
   putStrLn "\ntargets:"
   let targetIds = getTargets resultTbl id

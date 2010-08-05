@@ -1,5 +1,6 @@
 module Kainoa.Util
-( getInt64
+( getInt
+, getInt64
 , substr
 , getInts
 , toInt64
@@ -13,6 +14,9 @@ import Data.Binary.Get
 {-
   Functions on ByteStrings.
 -}
+
+getInt :: BL.ByteString -> Int
+getInt = toInt . getInt64
 
 -- Take first 4 bytes (32 bits) of bl;
 -- convert into Int64.
@@ -38,7 +42,8 @@ getInts bl start num =
     takeWhile (/= (-1)) $ map getInt [0 .. toInt64 (num-1)]
     where getInt i = case substr bl (start + (i*4)) 4 of
                        Nothing -> -1
-                       Just s -> toInt $ getInt64 s
+                       Just bl -> toInt $ getInt64 bl
+                       -- Just bl -> getInt bl
 
 {-
   Utility functions on Integrals.
