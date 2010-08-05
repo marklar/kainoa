@@ -1,5 +1,5 @@
 module Kainoa.IntsTbl
-( makeIntsTbl
+( openIntsTbl
 , getIntsFromTbl
 , firstOffset
 , IntsTbl
@@ -10,15 +10,15 @@ import qualified Data.ByteString.Lazy as BL
 import Data.Int (Int64)
 import Control.Monad (liftM)
 
-import Kainoa.Offsets (dataOffAndLen, makeOffsets, offsetForIdx)
+import Kainoa.Offsets (dataOffAndLen, openOffsets, offsetForIdx)
 import Kainoa.Util (getInts, toInt)
 import Kainoa.Types
 
 
-makeIntsTbl :: FilePath -> FilePath -> IO IntsTbl
-makeIntsTbl dir root =
+openIntsTbl :: FilePath -> FilePath -> IO IntsTbl
+openIntsTbl dir root =
     do let prefix = dir ++ "/" ++ root
-       offs <- liftM makeOffsets $ unsafeMMapFile (prefix ++ ".offs")
+       offs <- liftM openOffsets $ unsafeMMapFile (prefix ++ ".offs")
        ints <- liftM Ints        $ unsafeMMapFile (prefix ++ ".data")
        return $ IntsTbl offs ints
 

@@ -1,5 +1,5 @@
 module Kainoa.StrTbl
-( makeStrTbl
+( openStrTbl
 , getStrFromTbl
 ) where
 
@@ -7,14 +7,14 @@ import System.IO.Posix.MMap.Lazy (unsafeMMapFile)
 import qualified Data.ByteString.Lazy as BL
 import Control.Monad (liftM)
 
-import Kainoa.Offsets (dataOffAndLen, makeOffsets)
+import Kainoa.Offsets (dataOffAndLen, openOffsets)
 import Kainoa.Util (substr)
 import Kainoa.Types
 
-makeStrTbl :: FilePath -> FilePath -> IO StrTbl
-makeStrTbl dir root =
+openStrTbl :: FilePath -> FilePath -> IO StrTbl
+openStrTbl dir root =
     do let prefix = dir ++ "/" ++ root
-       offs <- liftM makeOffsets $ unsafeMMapFile (prefix ++ ".offs")
+       offs <- liftM openOffsets $ unsafeMMapFile (prefix ++ ".offs")
        strs <- liftM Strings     $ unsafeMMapFile (prefix ++ ".data")
        return $ StrTbl offs strs
 

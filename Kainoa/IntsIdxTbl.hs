@@ -1,5 +1,5 @@
 module Kainoa.IntsIdxTbl
-( makeIntsIdxTbl
+( openIntsIdxTbl
 , getIntsFromIdxTbl
 ) where
 
@@ -7,9 +7,9 @@ import Kainoa.Util (toInt)
 import Kainoa.IntsTbl
 import Kainoa.Types
 
-makeIntsIdxTbl :: FilePath -> FilePath -> IO IntsIdxTbl
-makeIntsIdxTbl dir root = do
-  intsTbl <- makeIntsTbl dir root
+openIntsIdxTbl :: FilePath -> FilePath -> IO IntsIdxTbl
+openIntsIdxTbl dir root = do
+  intsTbl <- openIntsTbl dir root
   let initIdx = head $ getIntsFromTbl intsTbl 1
   return $ IntsIdxTbl intsTbl initIdx
 
