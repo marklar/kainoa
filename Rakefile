@@ -11,5 +11,5 @@ CLOBBER.include("#{bindir}/#{o_name}")
 
 # -keep-hc-files 
 task :default do
-  `ghc -XScopedTypeVariables --make #{srcdir}/#{o_name} -outputdir #{outputdir} -o #{bindir}/#{o_name}`
+  `ghc -XScopedTypeVariables --make #{o_name}.hs -outputdir #{outputdir} -o #{bindir}/#{o_name}`
 end
