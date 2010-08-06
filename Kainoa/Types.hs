@@ -2,6 +2,8 @@ module Kainoa.Types where
 
 import qualified Data.ByteString.Lazy as BL
 
+data Domain = Domain String {-name-} Lexicon Matrix ResultTbl
+
 data Lexicon = Lexicon IntsBL StrTbl Int
 
 data Matrix = Matrix IntsTbl {-ids-} IntsTbl {-pops-}

@@ -3,7 +3,7 @@ module Main where
 import qualified Data.ByteString.Lazy as BL
 import System.Environment
 import Control.Monad (liftM)
-import Data.List (concat)
+import Data.List (concat, nub)
 
 import Kainoa.Types
 import Kainoa.ResultTbl
@@ -14,6 +14,7 @@ import Kainoa.Matrix (openMatrix, getIds, getPops)
 import Kainoa.Lexicon (openLexicon, getLexeme', findId, ids)
 
 import Kainoa.Util.Charset (utf8ToLatin1)
+import Kainoa.Domain
 
 dir :: FilePath
 dir = "idx/games"
@@ -22,7 +23,6 @@ main = do
   [lexeme] <- getArgs
   putStrLn lexeme
   lexemeIds <- getLexemeIds lexeme
-  -- mapM_ showLexeme lexemeIds
   popIds <- liftM concat $ mapM getPopPostings lexemeIds
   putStrLn ""
   mapM_ showPopResult popIds
@@ -50,9 +50,6 @@ getPopPostings lxmId = do
   mtx <- openMatrix dir
   let ids  = getIds  mtx lxmId
       pops = getPops mtx lxmId
-  -- putStrLn "postings:"
-  -- putStrLn $ "  ids:  " ++ (show ids)
-  -- putStrLn $ "  pops: " ++ (show pops)
   return pops
 
 showPopResult :: Int -> IO ()
@@ -87,6 +84,6 @@ showResult id = do
   putStrLn $ show targetIds
 
   putStr "all results with these targets: "
-  mapM_ (putStrLn . show . getResultsForTarget resultTbl) targetIds
+  putStrLn . show . nub $ concatMap (getResultsForTarget resultTbl) targetIds
 
   putStrLn ""
