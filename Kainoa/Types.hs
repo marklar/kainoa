@@ -5,11 +5,19 @@ import qualified Data.ByteString.Lazy as BL
 -- entire index
 -- data Domain = Domain ResultTbl
 
-data ResultTbl = ResultTbl Pops PopsIdx TextTbl TargetTbl TargetIdxTbl Int
+-- data ResultTbl = ResultTbl Pops PopsIdx TextTbl TargetTbl TargetIdxTbl Int
+data ResultTbl = ResultTbl 
+    { pops       :: Pops
+    , popsIdx    :: PopsIdx
+    , texts      :: TextTbl
+    , targets    :: TargetTbl
+    , targetsIdx :: TargetIdxTbl
+    , len        :: Int
+    }
 
 -- ResultTbl columns.
-type Pops         = Ints
-type PopsIdx      = Ints
+type Pops         = IntsBL
+type PopsIdx      = IntsBL
 {- make PopsTable be a wrapper around BOTH Pops and PopsIdx? -}
 
 type TextTbl      = StrTbl
@@ -20,15 +28,15 @@ type TargetIdxTbl = IntsIdxTbl
 
 
 -- Table types
-data StrTbl     = StrTbl     Offsets Strings
-data IntsTbl    = IntsTbl    Offsets Ints
+data StrTbl     = StrTbl     Offsets StringsBL
+data IntsTbl    = IntsTbl    Offsets IntsBL
 data IntsIdxTbl = IntsIdxTbl IntsTbl Int
 
 -- offset files
 data Offsets = Offsets BL.ByteString
 
 -- data files
-data Strings = Strings BL.ByteString
-data Ints    = Ints    BL.ByteString
+data StringsBL = StringsBL BL.ByteString
+data IntsBL    = IntsBL    BL.ByteString
 
 

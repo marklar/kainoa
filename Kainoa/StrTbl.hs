@@ -15,11 +15,11 @@ openStrTbl :: FilePath -> FilePath -> IO StrTbl
 openStrTbl dir root =
     do let prefix = dir ++ "/" ++ root
        offs <- liftM openOffsets $ unsafeMMapFile (prefix ++ ".offs")
-       strs <- liftM Strings     $ unsafeMMapFile (prefix ++ ".data")
+       strs <- liftM StringsBL   $ unsafeMMapFile (prefix ++ ".data")
        return $ StrTbl offs strs
 
 getStrFromTbl :: StrTbl -> Int -> Maybe BL.ByteString
-getStrFromTbl (StrTbl offs (Strings strs)) idx = 
+getStrFromTbl (StrTbl offs (StringsBL strs)) idx = 
     case dataOffAndLen offs idx of
       (Nothing, _) -> Nothing
       (Just off, mLen) -> substr strs off len

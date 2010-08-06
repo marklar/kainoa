@@ -14,25 +14,27 @@ import Kainoa.Types
 import Kainoa.StrTbl (openStrTbl, getStrFromTbl)
 import Kainoa.IntsTbl (openIntsTbl, getIntsFromTbl)
 import Kainoa.IntsIdxTbl (openIntsIdxTbl, getIntsFromIdxTbl)
-import Kainoa.Util (toInt, substr, getInt, toInt64)
+import Kainoa.Util (toInt, substr, readInt, toInt64)
+
+import Kainoa.IntsBL (openIntsBL, getLength, getInt)
+
 
 openResultTbl :: FilePath -> IO ResultTbl
 openResultTbl dir = do
-  pops          <- openInts       dir "res.pop.data"
-  popsIdx       <- openInts       dir "res.pop.idx.data"
+  pops          <- openIntsBL     dir "res.pop.data"
+  popsIdx       <- openIntsBL     dir "res.pop.idx.data"
   textTbl       <- openStrTbl     dir "res.text"
   targetsTbl    <- openIntsTbl    dir "res.target_ids"
   targetsIdxTbl <- openIntsIdxTbl dir "res.target_ids.idx"
   return $ ResultTbl pops popsIdx textTbl targetsTbl targetsIdxTbl (getLength pops)
 
 getPop :: ResultTbl -> Int -> Maybe Int
-getPop (ResultTbl (Ints pops) _ _ _ _ _) id =
-    case substr pops offset 4 of
-      Just s -> Just (getInt s)
-      Nothing -> Nothing
-    where 
-      offset = toInt64 $ (id-1) * 4
-    
+getPop (ResultTbl pops _ _ _ _ _) id =
+    getInt pops id
+
+getResultIdForPop :: ResultTbl -> Int -> Maybe Int
+getResultIdForPop (ResultTbl _ popsIdx _ _ _ _) id =
+    getInt popsIdx id
 
 getText :: ResultTbl -> Int -> Maybe BL.ByteString
 getText (ResultTbl _ _ texts _ _ _) id =
@@ -45,11 +47,3 @@ getTargets (ResultTbl _ _ _ targetsTbl _ _) id =
 getResultsForTarget :: ResultTbl -> Int -> [Int]
 getResultsForTarget (ResultTbl _ _ _ _ targetsIdxTbl _) targetId =
     getIntsFromIdxTbl targetsIdxTbl targetId
-
-getLength :: Ints -> Int
-getLength (Ints pops) =
-    (toInt (BL.length pops)) `div` 4
-
-openInts :: FilePath -> FilePath -> IO Ints
-openInts dir name = do
-  liftM Ints $ unsafeMMapFile (dir ++ "/" ++ name)

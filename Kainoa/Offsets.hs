@@ -7,7 +7,7 @@ module Kainoa.Offsets
 import qualified Data.ByteString.Lazy as BL
 import Data.Int
 
-import Kainoa.Util (getInt64, substr, toInt64)
+import Kainoa.Util (readInt64, substr, toInt64)
 import Kainoa.Types
 
 openOffsets :: BL.ByteString -> Offsets
@@ -26,7 +26,7 @@ dataOffAndLen offs idx =
 offsetForIdx :: Offsets -> Int -> Maybe Int64
 offsetForIdx (Offsets offs) idx =
     case substr offs offsOff 4 of
-      Just s -> Just (getInt64 s)
+      Just s -> Just (readInt64 s)
       Nothing -> Nothing
     where 
       offsOff = toInt64 $ (idx-1) * 4
