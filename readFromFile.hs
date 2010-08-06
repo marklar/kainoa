@@ -2,6 +2,8 @@ module Main where
 
 import qualified Data.ByteString.Lazy as BL
 import System.Environment
+import Control.Monad (liftM)
+import Data.List (concat)
 
 import Kainoa.Types
 import Kainoa.ResultTbl
@@ -18,10 +20,11 @@ dir = "idx/games"
 
 main = do
   [lexeme] <- getArgs
+  putStrLn lexeme
   lexemeIds <- getLexemeIds lexeme
-  let id = head lexemeIds
-  showLexeme id
-  popIds <- getPostings id
+  -- mapM_ showLexeme lexemeIds
+  popIds <- liftM concat $ mapM getPopPostings lexemeIds
+  putStrLn ""
   mapM_ showPopResult popIds
 
 getLexemeIds :: String -> IO [Int]
@@ -42,15 +45,14 @@ showLexeme lxmId = do
       let id = findId lexicon lxm
       putStrLn $ "lexeme ID: " ++ show id
 
-getPostings :: Int -> IO [Int]
-getPostings lxmId = do
+getPopPostings :: Int -> IO [Int]
+getPopPostings lxmId = do
   mtx <- openMatrix dir
   let ids  = getIds  mtx lxmId
       pops = getPops mtx lxmId
   -- putStrLn "postings:"
   -- putStrLn $ "  ids:  " ++ (show ids)
   -- putStrLn $ "  pops: " ++ (show pops)
-  putStrLn ""
   return pops
 
 showPopResult :: Int -> IO ()

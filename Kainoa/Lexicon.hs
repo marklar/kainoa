@@ -75,7 +75,7 @@ shortestSuperIds lexicon lexeme beg aft =
                   loop acc' (lxmId+1) (Just nextLxm)
           where nextLxm = maybe "" id (getLexeme' lexicon lxmId)
                 acc' = case prevLxm of
-                         Just s | isPrefixOf lexeme nextLxm -> acc
+                         Just s | isPrefixOf s nextLxm -> acc
                          otherwise -> lxmId:acc
 
 data NearestId = At Int | After Int
