@@ -3,6 +3,7 @@ module Kainoa.Lexicon
 , getLexeme
 , getLexeme'
 , findId
+, ids
 ) where
 
 import Kainoa.StrTbl
@@ -10,6 +11,8 @@ import qualified Data.ByteString.Lazy as BL
 import Control.Monad (liftM)
 import Char (ord)
 import Data.ByteString.Lazy.Char8 (pack, unpack)
+import Data.List (isPrefixOf)
+import Data.Maybe (maybe)
 
 import Kainoa.Types
 import Kainoa.IntsTbl (openIntsTbl, getIntsFromTbl)
@@ -23,10 +26,12 @@ openLexicon dir = do
   let maxId = strTblMaxId strs
   return $ Lexicon hd2id strs maxId
 
+-- >> BL.ByteString
 getLexeme :: Lexicon -> Int -> Maybe BL.ByteString
 getLexeme (Lexicon head strs maxId) id =
     getStrFromTbl strs id
 
+-- >> String
 getLexeme' :: Lexicon -> Int -> Maybe String
 getLexeme' lexicon id =
     case getLexeme lexicon id of
@@ -46,7 +51,32 @@ findId lexicon lexeme =
                   After id -> Partial (id,aft)
                   At id    -> Complete id
 
+ids :: Lexicon -> String -> [Int]
+ids lexicon lexeme =
+    case findId lexicon lexeme of
+      Miss              -> []
+      Complete id       -> [id]
+      Partial (beg,aft) -> shortestSuperIds lexicon lexeme beg aft
+
 ---------------
+
+shortestSuperIds :: Lexicon -> String -> Int -> Int -> [Int]
+shortestSuperIds lexicon lexeme beg aft =
+    loop [] beg Nothing  -- rev unnecessary
+    where
+      loop :: [Int] -> Int -> Maybe String -> [Int]
+      loop acc lxmId prevLxm =
+          if lxmId >= aft then
+              acc
+          else
+              if not (isPrefixOf lexeme nextLxm) then
+                  acc
+              else
+                  loop acc' (lxmId+1) (Just nextLxm)
+          where nextLxm = maybe "" id (getLexeme' lexicon lxmId)
+                acc' = case prevLxm of
+                         Just s | isPrefixOf lexeme nextLxm -> acc
+                         otherwise -> lxmId:acc
 
 data NearestId = At Int | After Int
                  deriving (Show)

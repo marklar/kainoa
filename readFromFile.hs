@@ -9,7 +9,7 @@ import Kainoa.ResultTbl
     , getText, getTargets, getResultsForTarget
     )
 import Kainoa.Matrix (openMatrix, getIds, getPops)
-import Kainoa.Lexicon (openLexicon, getLexeme', findId)
+import Kainoa.Lexicon (openLexicon, getLexeme', findId, ids)
 
 import Kainoa.Util.Charset (utf8ToLatin1)
 
@@ -17,12 +17,17 @@ dir :: FilePath
 dir = "idx/games"
 
 main = do
-  [idStr] <- getArgs
+  [idStr, lexeme] <- getArgs
   let id = read idStr :: Int
+  showLexemeIds lexeme
   showLexeme id
   showPostings id
   showResult id
 
+showLexemeIds :: String -> IO ()
+showLexemeIds lexeme = do
+  lexicon <- openLexicon dir
+  putStrLn $ "lexeme IDs: " ++ show (ids lexicon lexeme)
 
 showLexeme :: Int -> IO ()
 showLexeme lxmId = do
