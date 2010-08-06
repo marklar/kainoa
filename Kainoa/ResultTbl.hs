@@ -29,11 +29,11 @@ openResultTbl dir = do
 
 getPop :: ResultTbl -> Int -> Maybe Int
 getPop (ResultTbl pops _ _ _ _ _) id =
-    getInt pops id
+    getInt pops (id-1)
 
 getResultIdForPop :: ResultTbl -> Int -> Maybe Int
 getResultIdForPop (ResultTbl _ popsIdx _ _ _ _) pop =
-    getInt popsIdx pop
+    getInt popsIdx (pop-1)
 
 getText :: ResultTbl -> Int -> Maybe BL.ByteString
 getText (ResultTbl _ _ texts _ _ _) id =

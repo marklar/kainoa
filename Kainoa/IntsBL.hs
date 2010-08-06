@@ -23,7 +23,7 @@ getInt (IntsBL ints) id =
       Just s -> Just (readInt s)
       Nothing -> Nothing
     where
-      offset = toInt64 $ (id-1) * 4  -- bytesPerInt
+      offset = toInt64 $ id * 4  -- bytesPerInt
 
 getLength :: IntsBL -> Int
 getLength (IntsBL pops) =

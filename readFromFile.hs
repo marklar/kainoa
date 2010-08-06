@@ -32,8 +32,8 @@ showLexeme lxmId = do
     Nothing -> putStrLn "none"
     Just lxm -> do
       putStrLn lxm
-      let lxmId = findId lexicon lxm
-      putStrLn $ "lexeme ID: " ++ show lxmId
+      let id = findId lexicon lxm
+      putStrLn $ "lexeme ID: " ++ show id
 
 showPostings :: Int -> IO ()
 showPostings lxmId = do

@@ -43,7 +43,7 @@ findId lexicon lexeme =
             Just s | s == lexeme -> Complete beg
             otherwise -> 
                 case chopId lexicon lexeme beg aft of
-                  After id -> Partial id aft
+                  After id -> Partial (id,aft)
                   At id    -> Complete id
 
 ---------------
@@ -53,7 +53,7 @@ data NearestId = At Int | After Int
 
 data LexemeIdMatch = Miss
                    | Complete Int
-                   | Partial Int Int
+                   | Partial (Int,Int)
                      deriving (Show)
 
 boundIds :: Lexicon -> Int -> Maybe (Int, Int)
@@ -68,6 +68,19 @@ firstIdForHead (Lexicon hd2id _ _) charCode =
       Nothing -> 0
       Just id -> id
 
+idAfter :: Lexicon -> Int -> Int
+idAfter lexicon@(Lexicon hd2id strs maxId) charCode =
+    if charCode >= maxCharCode then
+        maxId + 1
+    else
+        case firstIdForHead lexicon nextCharCode of
+          0  -> idAfter lexicon nextCharCode
+          id -> id
+    where
+      nextCharCode = charCode + 1
+
+maxCharCode = 255
+
 chopId :: Lexicon -> String -> Int -> Int -> NearestId
 chopId lexicon lexeme min max =
     if min > max then
@@ -81,16 +94,3 @@ chopId lexicon lexeme min max =
                 GT -> chopId lexicon lexeme (mid+1) max
                 LT -> chopId lexicon lexeme min     (mid-1)
     where mid = (min + max) `div` 2
-
-idAfter :: Lexicon -> Int -> Int
-idAfter lexicon@(Lexicon hd2id strs maxId) charCode =
-    if charCode >= maxCharCode then
-        maxId + 1
-    else
-        case firstIdForHead lexicon nextCharCode of
-          0  -> idAfter lexicon nextCharCode
-          id -> id
-    where
-      nextCharCode = charCode + 1
-
-maxCharCode = 255
