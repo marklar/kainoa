@@ -11,6 +11,8 @@ import Kainoa.ResultTbl
 import Kainoa.Matrix (openMatrix, getIds, getPops)
 import Kainoa.Lexicon (openLexicon, getLexeme)
 
+import Kainoa.Util.Charset (utf8ToLatin1)
+
 dir :: FilePath
 dir = "idx/games"
 
@@ -20,6 +22,7 @@ main = do
   showLexeme id
   showPostings id
   showResult id
+
 
 showLexeme :: Int -> IO ()
 showLexeme lxmId = do
