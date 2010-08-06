@@ -1,6 +1,7 @@
 module Kainoa.ResultTbl
 ( openResultTbl
 , getPop
+, getResultIdForPop
 , getText
 , getTargets
 , getResultsForTarget
