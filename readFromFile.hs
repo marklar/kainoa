@@ -17,17 +17,19 @@ dir :: FilePath
 dir = "idx/games"
 
 main = do
-  [idStr, lexeme] <- getArgs
-  let id = read idStr :: Int
-  showLexemeIds lexeme
+  [lexeme] <- getArgs
+  lexemeIds <- getLexemeIds lexeme
+  let id = head lexemeIds
   showLexeme id
-  showPostings id
-  showResult id
+  popIds <- getPostings id
+  mapM_ showPopResult popIds
 
-showLexemeIds :: String -> IO ()
-showLexemeIds lexeme = do
+getLexemeIds :: String -> IO [Int]
+getLexemeIds lexeme = do
   lexicon <- openLexicon dir
-  putStrLn $ "lexeme IDs: " ++ show (ids lexicon lexeme)
+  let res = ids lexicon lexeme
+  putStrLn $ show [(id, getLexeme' lexicon id) | id <- res ]
+  return $ res
 
 showLexeme :: Int -> IO ()
 showLexeme lxmId = do
@@ -40,15 +42,23 @@ showLexeme lxmId = do
       let id = findId lexicon lxm
       putStrLn $ "lexeme ID: " ++ show id
 
-showPostings :: Int -> IO ()
-showPostings lxmId = do
+getPostings :: Int -> IO [Int]
+getPostings lxmId = do
   mtx <- openMatrix dir
   let ids  = getIds  mtx lxmId
       pops = getPops mtx lxmId
-  putStrLn "postings:"
-  putStrLn $ "  ids:  " ++ (show ids)
-  putStrLn $ "  pops: " ++ (show pops)
+  -- putStrLn "postings:"
+  -- putStrLn $ "  ids:  " ++ (show ids)
+  -- putStrLn $ "  pops: " ++ (show pops)
   putStrLn ""
+  return pops
+
+showPopResult :: Int -> IO ()
+showPopResult popId = do
+  resultTbl <- openResultTbl dir
+  case getResultIdForPop resultTbl popId of
+    Just resId -> showResult resId
+    Nothing -> putStrLn "none"
 
 showResult :: Int -> IO ()
 showResult id = do
@@ -76,3 +86,5 @@ showResult id = do
 
   putStr "all results with these targets: "
   mapM_ (putStrLn . show . getResultsForTarget resultTbl) targetIds
+
+  putStrLn ""
