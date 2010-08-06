@@ -2,41 +2,25 @@ module Kainoa.Types where
 
 import qualified Data.ByteString.Lazy as BL
 
--- entire index
--- data Domain = Domain ResultTbl
+data Lexicon = Lexicon IntsBL StrTbl Int
 
--- data ResultTbl = ResultTbl Pops PopsIdx TextTbl TargetTbl TargetIdxTbl Int
+data Matrix = Matrix IntsTbl {-ids-} IntsTbl {-pops-}
+
 data ResultTbl = ResultTbl 
-    { pops       :: Pops
-    , popsIdx    :: PopsIdx
-    , texts      :: TextTbl
-    , targets    :: TargetTbl
-    , targetsIdx :: TargetIdxTbl
+    { pops       :: IntsBL
+    , popsIdx    :: IntsBL
+    , texts      :: StrTbl
+    , targets    :: IntsTbl
+    , targetsIdx :: IntsIdxTbl
     , len        :: Int
     }
 
--- ResultTbl columns.
-type Pops         = IntsBL
-type PopsIdx      = IntsBL
-{- make PopsTable be a wrapper around BOTH Pops and PopsIdx? -}
+-- Tables
+data StrTbl     = StrTbl     Offsets BL.ByteString Int {-len-}
+data IntsTbl    = IntsTbl    Offsets IntsBL        Int {-len-}
+data IntsIdxTbl = IntsIdxTbl IntsTbl Int {-firstUsedId-}
 
-type TextTbl      = StrTbl
-
-type TargetTbl    = IntsTbl
-type TargetIdxTbl = IntsIdxTbl
-{- make the TargetTable be a wrapper around BOTH TargetTbl AND TargetIdxTbl? -}
-
-
--- Table types
-data StrTbl     = StrTbl     Offsets StringsBL
-data IntsTbl    = IntsTbl    Offsets IntsBL
-data IntsIdxTbl = IntsIdxTbl IntsTbl Int
-
--- offset files
+-- Simple "Arrays"
 data Offsets = Offsets BL.ByteString
-
--- data files
-data StringsBL = StringsBL BL.ByteString
-data IntsBL    = IntsBL    BL.ByteString
-
+data IntsBL  = IntsBL  BL.ByteString
 

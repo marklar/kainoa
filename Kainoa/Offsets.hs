@@ -1,13 +1,18 @@
 module Kainoa.Offsets
 ( dataOffAndLen
 , offsetForIdx
+, offsetsMaxId
 ) where
 
 import qualified Data.ByteString.Lazy as BL
 
 import Kainoa.Util.ByteString (readInt64, substr)
-import Kainoa.Util.Integral (toInt64, Int64)
+import Kainoa.Util.Integral (toInt, toInt64, Int64)
 import Kainoa.Types
+
+offsetsMaxId :: Offsets -> Int
+offsetsMaxId (Offsets bl) =
+    toInt (BL.length bl) `div` 4
 
 dataOffAndLen :: Offsets -> Int -> (Maybe Int64, Maybe Int64)
 dataOffAndLen offs idx =
