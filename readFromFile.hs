@@ -3,7 +3,10 @@ module Main where
 import qualified Data.ByteString.Lazy as BL
 import System.Environment
 
-import Kainoa.ResultTbl (openResultTbl, getPop, getResultIdForPop, getText, getTargets, getResultsForTarget)
+import Kainoa.ResultTbl
+    ( openResultTbl, getPop, getResultIdForPop
+    , getText, getTargets, getResultsForTarget
+    )
 import Kainoa.Types
 
 main = do

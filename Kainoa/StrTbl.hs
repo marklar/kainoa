@@ -7,15 +7,15 @@ import System.IO.Posix.MMap.Lazy (unsafeMMapFile)
 import qualified Data.ByteString.Lazy as BL
 import Control.Monad (liftM)
 
-import Kainoa.Offsets (dataOffAndLen, openOffsets)
+import Kainoa.Offsets (dataOffAndLen)
 import Kainoa.Util (substr)
 import Kainoa.Types
 
 openStrTbl :: FilePath -> FilePath -> IO StrTbl
 openStrTbl dir root =
     do let prefix = dir ++ "/" ++ root
-       offs <- liftM openOffsets $ unsafeMMapFile (prefix ++ ".offs")
-       strs <- liftM StringsBL   $ unsafeMMapFile (prefix ++ ".data")
+       offs <- liftM Offsets   $ unsafeMMapFile (prefix ++ ".offs")
+       strs <- liftM StringsBL $ unsafeMMapFile (prefix ++ ".data")
        return $ StrTbl offs strs
 
 getStrFromTbl :: StrTbl -> Int -> Maybe BL.ByteString

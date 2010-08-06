@@ -1,17 +1,12 @@
 module Kainoa.Offsets
 ( dataOffAndLen
-, openOffsets
 , offsetForIdx
 ) where
 
 import qualified Data.ByteString.Lazy as BL
-import Data.Int
 
-import Kainoa.Util (readInt64, substr, toInt64)
+import Kainoa.Util (readInt64, substr, toInt64, Int64)
 import Kainoa.Types
-
-openOffsets :: BL.ByteString -> Offsets
-openOffsets bs = Offsets bs
 
 dataOffAndLen :: Offsets -> Int -> (Maybe Int64, Maybe Int64)
 dataOffAndLen offs idx =
