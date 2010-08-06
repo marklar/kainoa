@@ -15,7 +15,7 @@ import Kainoa.Types
 
 openStrTbl :: FilePath -> FilePath -> IO StrTbl
 openStrTbl dir root = do
-  offs <- liftM Offsets   $ unsafeMMapFile (prefix ++ ".offs")
+  offs <- liftM Offsets $ unsafeMMapFile (prefix ++ ".offs")
   strs <- unsafeMMapFile (prefix ++ ".data")
   return $ StrTbl offs strs (len offs)
   where

@@ -9,7 +9,7 @@ import Kainoa.ResultTbl
     , getText, getTargets, getResultsForTarget
     )
 import Kainoa.Matrix (openMatrix, getIds, getPops)
-import Kainoa.Lexicon (openLexicon, getLexeme)
+import Kainoa.Lexicon (openLexicon, getLexeme', findId)
 
 import Kainoa.Util.Charset (utf8ToLatin1)
 
@@ -28,10 +28,12 @@ showLexeme :: Int -> IO ()
 showLexeme lxmId = do
   lexicon <- openLexicon dir
   putStr "lexeme: "
-  case getLexeme lexicon lxmId of
+  case getLexeme' lexicon lxmId of
     Nothing -> putStrLn "none"
-    Just lxm -> BL.putStrLn lxm
-  putStrLn ""
+    Just lxm -> do
+      putStrLn lxm
+      let lxmId = findId lexicon lxm
+      putStrLn $ "lexeme ID: " ++ show lxmId
 
 showPostings :: Int -> IO ()
 showPostings lxmId = do
@@ -42,7 +44,6 @@ showPostings lxmId = do
   putStrLn $ "  ids:  " ++ (show ids)
   putStrLn $ "  pops: " ++ (show pops)
   putStrLn ""
-
 
 showResult :: Int -> IO ()
 showResult id = do
@@ -59,14 +60,14 @@ showResult id = do
     Nothing ->
         putStrLn "none"
 
-  putStr "\ntext: "
+  putStr "text: "
   case getText resultTbl id of
     Just s  -> BL.putStrLn s
     Nothing -> putStrLn "none"
 
-  putStr "\ntargets: "
+  putStr "targets: "
   let targetIds = getTargets resultTbl id
   putStrLn $ show targetIds
 
-  putStr "\nall results with these targets: "
+  putStr "all results with these targets: "
   mapM_ (putStrLn . show . getResultsForTarget resultTbl) targetIds
