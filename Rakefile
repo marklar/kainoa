@@ -4,8 +4,8 @@ srcdir = 'Kainoa'
 outputdir = 'obj'
 bindir = 'bin'
 o_name = 'readFromFile'
-['.'].each do |dir|
-  CLEAN.include("#{outputdir}/#{dir}/*.hi", "#{outputdir}/#{dir}/*.o")
+['hi', 'o'].each do |ext|
+  CLEAN.include("#{outputdir}/**/*.#{ext}")
 end
 CLOBBER.include("#{bindir}/#{o_name}")
 

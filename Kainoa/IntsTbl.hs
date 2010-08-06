@@ -10,7 +10,8 @@ import qualified Data.ByteString.Lazy as BL
 import Control.Monad (liftM)
 
 import Kainoa.Offsets (dataOffAndLen, offsetForIdx)
-import Kainoa.Util (readInts, toInt, Int64)
+import Kainoa.Util.ByteString (readInts)
+import Kainoa.Util.Integral (toInt, Int64)
 import Kainoa.Types
 
 
@@ -21,8 +22,8 @@ openIntsTbl dir root =
        ints <- liftM IntsBL  $ unsafeMMapFile (prefix ++ ".data")
        return $ IntsTbl offs ints
 
-numBytesPerInt :: Int
-numBytesPerInt = 4
+bytesPerInt :: Int
+bytesPerInt = 4
 
 getIntsFromTbl :: IntsTbl -> Int -> [Int]
 getIntsFromTbl (IntsTbl offs (IntsBL intsBL)) idx = 
@@ -30,7 +31,7 @@ getIntsFromTbl (IntsTbl offs (IntsBL intsBL)) idx =
       (Nothing, _) -> []
       (Just off, mLen) -> readInts intsBL off numInts
           where
-            numInts = (toInt len) `div` numBytesPerInt
+            numInts = (toInt len) `div` bytesPerInt
             len = case mLen of
                     Just l -> l
                     Nothing -> (BL.length intsBL) - off

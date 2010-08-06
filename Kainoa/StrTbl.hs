@@ -8,7 +8,7 @@ import qualified Data.ByteString.Lazy as BL
 import Control.Monad (liftM)
 
 import Kainoa.Offsets (dataOffAndLen)
-import Kainoa.Util (substr)
+import Kainoa.Util.ByteString (substr)
 import Kainoa.Types
 
 openStrTbl :: FilePath -> FilePath -> IO StrTbl

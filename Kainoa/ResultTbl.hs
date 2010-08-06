@@ -15,8 +15,6 @@ import Kainoa.Types
 import Kainoa.StrTbl (openStrTbl, getStrFromTbl)
 import Kainoa.IntsTbl (openIntsTbl, getIntsFromTbl)
 import Kainoa.IntsIdxTbl (openIntsIdxTbl, getIntsFromIdxTbl)
-import Kainoa.Util (toInt, substr, readInt, toInt64)
-
 import Kainoa.IntsBL (openIntsBL, getLength, getInt)
 
 
@@ -34,8 +32,8 @@ getPop (ResultTbl pops _ _ _ _ _) id =
     getInt pops id
 
 getResultIdForPop :: ResultTbl -> Int -> Maybe Int
-getResultIdForPop (ResultTbl _ popsIdx _ _ _ _) id =
-    getInt popsIdx id
+getResultIdForPop (ResultTbl _ popsIdx _ _ _ _) pop =
+    getInt popsIdx pop
 
 getText :: ResultTbl -> Int -> Maybe BL.ByteString
 getText (ResultTbl _ _ texts _ _ _) id =

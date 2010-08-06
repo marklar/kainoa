@@ -3,7 +3,6 @@ module Kainoa.IntsIdxTbl
 , getIntsFromIdxTbl
 ) where
 
-import Kainoa.Util (toInt)
 import Kainoa.IntsTbl
 import Kainoa.Types
 

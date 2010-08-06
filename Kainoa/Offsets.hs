@@ -5,7 +5,8 @@ module Kainoa.Offsets
 
 import qualified Data.ByteString.Lazy as BL
 
-import Kainoa.Util (readInt64, substr, toInt64, Int64)
+import Kainoa.Util.ByteString (readInt64, substr)
+import Kainoa.Util.Integral (toInt64, Int64)
 import Kainoa.Types
 
 dataOffAndLen :: Offsets -> Int -> (Maybe Int64, Maybe Int64)
