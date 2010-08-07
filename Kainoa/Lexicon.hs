@@ -1,9 +1,9 @@
 module Kainoa.Lexicon
 ( openLexicon
+, getLexemeIds
 , getLexeme
 , getLexeme'
 , findId
-, ids
 ) where
 
 import Kainoa.StrTbl
@@ -51,8 +51,8 @@ findId lexicon lexeme =
                   After id -> Partial (id,aft)
                   At id    -> Complete id
 
-ids :: Lexicon -> String -> [Int]
-ids lexicon lexeme =
+getLexemeIds :: Lexicon -> String -> [Int]
+getLexemeIds lexicon lexeme =
     case findId lexicon lexeme of
       Miss              -> []
       Complete id       -> [id]

@@ -1,5 +1,6 @@
 module Kainoa.ResultTbl
 ( openResultTbl
+, getResult
 , getPop
 , getResultIdForPop
 , getText
@@ -26,6 +27,16 @@ openResultTbl dir = do
   targetsTbl    <- openIntsTbl    dir "res.target_ids"
   targetsIdxTbl <- openIntsIdxTbl dir "res.target_ids.idx"
   return $ ResultTbl pops popsIdx textTbl targetsTbl targetsIdxTbl (getLength pops)
+
+getResult :: ResultTbl -> Int -> Maybe Result
+getResult resultTbl id =
+    case getPop resultTbl id of
+      Nothing -> Nothing
+      Just pop ->
+          case getText resultTbl id of
+            Nothing -> Nothing
+            Just text -> Just $ Result id pop text targetIds
+    where targetIds = getTargets resultTbl id
 
 getPop :: ResultTbl -> Int -> Maybe Int
 getPop (ResultTbl pops _ _ _ _ _) id =
