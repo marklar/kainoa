@@ -3,7 +3,7 @@ module Kainoa.Lexicon
 , getLexemeIds
 , getLexeme
 , getLexeme'
-, findId
+, findLexemeId
 ) where
 
 import Kainoa.StrTbl
@@ -38,8 +38,8 @@ getLexeme' lexicon id =
       Nothing -> Nothing
       Just s -> Just $ unpack s
 
-findId :: Lexicon -> String -> LexemeIdMatch
-findId lexicon lexeme =
+findLexemeId :: Lexicon -> String -> LexemeIdMatch
+findLexemeId lexicon lexeme =
     case boundIds lexicon (ord $ head lexeme) of
       Nothing -> Miss
       Just (beg, aft) ->
@@ -53,12 +53,12 @@ findId lexicon lexeme =
 
 getLexemeIds :: Lexicon -> String -> [Int]
 getLexemeIds lexicon lexeme =
-    case findId lexicon lexeme of
+    case findLexemeId lexicon lexeme of
       Miss              -> []
       Complete id       -> [id]
       Partial (beg,aft) -> shortestSuperIds lexicon lexeme beg aft
 
----------------
+-- not exported --
 
 shortestSuperIds :: Lexicon -> String -> Int -> Int -> [Int]
 shortestSuperIds lexicon lexeme beg aft =

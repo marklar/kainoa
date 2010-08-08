@@ -1,6 +1,6 @@
 module Kainoa.IntsBL
 ( openIntsBL
-, getLength
+, getNumInts
 , getInt
 ) where
 
@@ -10,7 +10,7 @@ import Control.Monad (liftM)
 
 import Kainoa.Types
 import Kainoa.Util.ByteString (readInt, substr)
-import Kainoa.Util.Integral (toInt, toInt64, Int64)
+import Kainoa.Util.Integral (toInt, toInt64)
 
 
 openIntsBL :: FilePath -> FilePath -> IO IntsBL
@@ -25,10 +25,10 @@ getInt (IntsBL ints) id =
     where
       offset = toInt64 $ id * 4  -- bytesPerInt
 
-getLength :: IntsBL -> Int
-getLength (IntsBL pops) =
-    toInt (BL.length pops) `div` 4  -- bytesPerInt
-
+-- Store this in IntsBL type?
+getNumInts :: IntsBL -> Int
+getNumInts (IntsBL ints) =
+    toInt (BL.length ints) `div` 4  -- bytesPerInt
 
 -- Use this as a utility function,
 -- from which to build others.

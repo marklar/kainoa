@@ -16,7 +16,8 @@ import Kainoa.Types
 import Kainoa.StrTbl (openStrTbl, getStrFromTbl)
 import Kainoa.IntsTbl (openIntsTbl, getIntsFromTbl)
 import Kainoa.IntsIdxTbl (openIntsIdxTbl, getIntsFromIdxTbl)
-import Kainoa.IntsBL (openIntsBL, getLength, getInt)
+import Kainoa.IntsBL (openIntsBL, getNumInts, getInt)
+import Kainoa.BoolBL (openBoolBL)
 
 
 openResultTbl :: FilePath -> IO ResultTbl
@@ -26,7 +27,8 @@ openResultTbl dir = do
   textTbl       <- openStrTbl     dir "res.text"
   targetsTbl    <- openIntsTbl    dir "res.target_ids"
   targetsIdxTbl <- openIntsIdxTbl dir "res.target_ids.idx"
-  return $ ResultTbl pops popsIdx textTbl targetsTbl targetsIdxTbl (getLength pops)
+  isFauxBL      <- openBoolBL     dir "res.is_faux.data"
+  return $ ResultTbl pops popsIdx textTbl targetsTbl targetsIdxTbl isFauxBL (getNumInts pops)
 
 getResult :: ResultTbl -> Int -> Maybe Result
 getResult resultTbl id =
@@ -39,21 +41,21 @@ getResult resultTbl id =
     where targetIds = getTargets resultTbl id
 
 getPop :: ResultTbl -> Int -> Maybe Int
-getPop (ResultTbl pops _ _ _ _ _) id =
+getPop (ResultTbl pops _ _ _ _ _ _) id =
     getInt pops (id-1)
 
 getResultIdForPop :: ResultTbl -> Int -> Maybe Int
-getResultIdForPop (ResultTbl _ popsIdx _ _ _ _) pop =
+getResultIdForPop (ResultTbl _ popsIdx _ _ _ _ _) pop =
     getInt popsIdx (pop-1)
 
 getText :: ResultTbl -> Int -> Maybe BL.ByteString
-getText (ResultTbl _ _ texts _ _ _) id =
+getText (ResultTbl _ _ texts _ _ _ _) id =
     getStrFromTbl texts id
 
 getTargets :: ResultTbl -> Int -> [Int]
-getTargets (ResultTbl _ _ _ targetsTbl _ _) id =
+getTargets (ResultTbl _ _ _ targetsTbl _ _ _) id =
     getIntsFromTbl targetsTbl id
 
 getResultsForTarget :: ResultTbl -> Int -> [Int]
-getResultsForTarget (ResultTbl _ _ _ _ targetsIdxTbl _) targetId =
+getResultsForTarget (ResultTbl _ _ _ _ targetsIdxTbl _ _) targetId =
     getIntsFromIdxTbl targetsIdxTbl targetId

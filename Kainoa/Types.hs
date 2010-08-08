@@ -4,11 +4,16 @@ import Data.List (intercalate)
 import Data.ByteString.Lazy.Char8 (pack, unpack)
 import qualified Data.ByteString.Lazy as BL
 
-data Domain = Domain String {-name-} Lexicon Matrix ResultTbl
+data Domain = Domain String Lexicon Matrix ResultTbl (Maybe TagTbl)
 
 data Lexicon = Lexicon IntsBL StrTbl Int
 
-data Matrix = Matrix IntsTbl {-ids-} IntsTbl {-pops-}
+-- Use these structs for structural typing.
+-- Can create a new Matrix by simply using {resIds = foo, popIds = bar}.
+data Matrix = Matrix
+    { resIds :: IntsTbl
+    , popIds :: IntsTbl
+    }
 
 data ResultTbl = ResultTbl 
     { pops       :: IntsBL
@@ -16,7 +21,22 @@ data ResultTbl = ResultTbl
     , texts      :: StrTbl
     , targets    :: IntsTbl
     , targetsIdx :: IntsIdxTbl
-    , len        :: Int
+    , isFauxBL   :: Maybe BoolBL
+    , numResults :: Int
+    }
+
+data TagTbl = TagTbl
+    { typeIds   :: IntsBL
+    , availGlus :: IntsBL
+    , totalGlus :: IntsBL
+    , numTags   :: Int
+    }
+
+data Tag = Tag
+    { tagId    :: Int
+    , tagName  :: String
+    , tagAvail :: Int
+    , tagTotal :: Int
     }
 
 data Result = Result Int Int BL.ByteString [Int]
@@ -30,7 +50,12 @@ instance Show Result where
                      , "target_ids:" ++ show targetIds
                      ]
 
--- Tables
+data ResultSet = ResultSet [Result]
+instance Show ResultSet where
+    show (ResultSet rs) =
+        "{success:true, results:\n" ++ intercalate ",\n" (map show rs) ++ "}"
+
+-- Basic Tables
 data StrTbl     = StrTbl     Offsets BL.ByteString Int {-len-}
 data IntsTbl    = IntsTbl    Offsets IntsBL        Int {-len-}
 data IntsIdxTbl = IntsIdxTbl IntsTbl Int {-firstUsedId-}
@@ -38,4 +63,4 @@ data IntsIdxTbl = IntsIdxTbl IntsTbl Int {-firstUsedId-}
 -- Simple "Arrays"
 data Offsets = Offsets BL.ByteString
 data IntsBL  = IntsBL  BL.ByteString
-
+data BoolBL  = BoolBL  BL.ByteString
