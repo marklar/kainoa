@@ -5,37 +5,41 @@ module Kainoa.IntsTbl
 , IntsTbl
 ) where
 
-import System.IO.Posix.MMap.Lazy (unsafeMMapFile)
-import qualified Data.ByteString.Lazy as BL
+import Data.Vector.Storable.MMap (unsafeMMapVector)
+import qualified Data.Vector.Storable as V
 import Control.Monad (liftM)
+import Data.Int (Int32)
 
 import Kainoa.Offsets (dataOffAndLen, offsetForIdx, offsetsMaxId)
 import Kainoa.Util.ByteString (readInts)
-import Kainoa.Util.Integral (toInt, Int64)
+import Kainoa.Util.Integral (toInt)
 import Kainoa.Types
 
 
 openIntsTbl :: FilePath -> FilePath -> IO IntsTbl
 openIntsTbl dir root = do
-  offs <- liftM Offsets $ unsafeMMapFile (prefix ++ ".offs")
-  ints <- liftM IntsBL  $ unsafeMMapFile (prefix ++ ".data")
+  offs <- liftM Offsets $ unsafeMMapVector (prefix ++ ".offs") Nothing
+  ints <- liftM IntsV   $ unsafeMMapVector (prefix ++ ".data") Nothing
   return $ IntsTbl offs ints (offsetsMaxId offs)
     where
       prefix = dir ++ "/" ++ root
 
-getIntsFromTbl :: IntsTbl -> Int -> [Int]
-getIntsFromTbl (IntsTbl offs (IntsBL intsBL) maxId) idx = 
+getIntsFromTbl :: IntsTbl -> Int -> V.Vector Int32
+getIntsFromTbl (IntsTbl offs (IntsV intsV) maxId) idx = 
     -- cmp idx to maxId?
     case dataOffAndLen offs idx of
-      (Nothing, _) -> []
-      (Just off, mLen) -> readInts intsBL off numInts
-          where
-            numInts = (toInt len) `div` bytesPerInt
-            len = case mLen of
-                    Just l -> l
-                    Nothing -> (BL.length intsBL) - off
+      (Nothing, _) -> V.empty
+      (Just off, maybeLen) ->
+          V.slice off32 len32 intsV
+        where
+          off32 = off `div` 4
+          len32 = len `div` bytesPerInt
+          -- numInts = len `div` bytesPerInt
+          len = case maybeLen of
+                  Just l -> l
+                  Nothing -> (V.length intsV) - off32
 
-firstOffset :: IntsTbl -> Maybe Int64
+firstOffset :: IntsTbl -> Maybe Int
 firstOffset (IntsTbl offs _ _) =
     offsetForIdx offs 0
 

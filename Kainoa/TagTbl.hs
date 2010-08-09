@@ -9,7 +9,7 @@ import System.Posix.Files (fileExist)
 
 import Kainoa.Types
 import Kainoa.Util.Integral (inRange)
-import Kainoa.IntsBL (openIntsBL, getNumInts, getInt)
+import Kainoa.IntsV (openIntsV, getNumInts, getInt)
 
 openTagTbl :: FilePath -> IO (Maybe TagTbl)
 openTagTbl dir = do
@@ -17,9 +17,9 @@ openTagTbl dir = do
   case pred of
     False -> return Nothing
     True  -> do
-        typeIds   <- openIntsBL dir "tag.type_ids.data"
-        availGlus <- openIntsBL dir "tag.avail_glus.data"  -- Will mutate!
-        totalGlus <- openIntsBL dir "tag.total_glus.data"
+        typeIds   <- openIntsV dir "tag.type_ids.data"
+        availGlus <- openIntsV dir "tag.avail_glus.data"  -- Will mutate!
+        totalGlus <- openIntsV dir "tag.total_glus.data"
         return $ Just $ TagTbl typeIds availGlus totalGlus (getNumInts typeIds)
 
 fetchTag :: TagTbl -> Int -> Maybe Tag

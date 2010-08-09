@@ -3,17 +3,20 @@ module Kainoa.Domain
 , getResults
 ) where
 
-import qualified Data.ByteString.Lazy as BL
+import qualified Data.Vector.Storable as V
 import System.Environment
 import Control.Monad (liftM)
 import Data.List (concat, nub, sort)
 import Data.Maybe (mapMaybe)
+import Data.Int (Int32)
 
 import Kainoa.Types
 import Kainoa.ResultTbl (openResultTbl, getResult, getResultIdForPop)
 import Kainoa.Matrix (openMatrix, getIds, getPops)
 import Kainoa.Lexicon (openLexicon, getLexemeIds)
 import Kainoa.TagTbl (openTagTbl)
+import Kainoa.Util.Integral (toInt)
+import Kainoa.Util.OrdList (ordMergeNub)
 
 openDomain :: FilePath -> IO Domain
 openDomain dir = do
@@ -27,8 +30,8 @@ getResults :: Domain -> String -> ResultSet
 getResults domain@(Domain _ lexicon _ _ _) lexeme =
     ResultSet (shortResults ++ popResults)
     where
-      shortResults = take 1 $ getShortResults domain lexemeIds
-      popResults   = take 4 $ filter notShort $ getPopResults domain lexemeIds
+      shortResults = take 1  $ getShortResults domain lexemeIds
+      popResults   = take 20 $ filter notShort $ getPopResults domain lexemeIds
       notShort r = r `notElem` shortResults
       lexemeIds = getLexemeIds lexicon lexeme
 
@@ -54,8 +57,10 @@ getPopResults (Domain _ _ matrix resultTbl _) lexemeIds =
       resultIds = mapMaybe (getResultIdForPop resultTbl) popIds
       popIds = getResultIds (getPops matrix) lexemeIds
 
--- FixMe.  Unperformant.
-getResultIds :: (Int -> [Int]) -> [Int] -> [Int]
-getResultIds postingsFun lexemeIds =
-    sort . nub . concat $ map postingsFun lexemeIds
-    
+getResultIds :: (Int -> V.Vector Int32) -> [Int] -> [Int]
+getResultIds postingsFetcher lexemeIds =
+    case resIdLists of
+      [] -> []
+      otherwise -> map toInt $ foldl1 ordMergeNub resIdLists
+    where
+      resIdLists = map (V.toList . postingsFetcher) lexemeIds
