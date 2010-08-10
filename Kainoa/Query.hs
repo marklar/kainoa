@@ -4,12 +4,14 @@ module Kainoa.Query
 ) where
 
 import Data.List (nub)
+import Data.Maybe (mapMaybe)
 
 import Kainoa.Types
-import Kainoa.Util.OrdList (ordIntersectNubBy, ordMergeNubBy)
+import Kainoa.Util.OrdList (ordIntersectNubBy, ordMergeNubBy, ordDiffBy)
 import Kainoa.Domain (getShortResults, getPopResults)
 import Kainoa.Lexicon (getLexemeIds)
 import Kainoa.Result (cmpId, cmpPop)
+import Kainoa.ResultTbl (getResult, getMaxId)
 
 
 makeQuery :: String -> Query
@@ -18,13 +20,20 @@ makeQuery queryStr =
       [] -> EmptyQuery
       lexemes -> andQueries $ map ofLexeme lexemes
 
-
+{-
+  ToDo:
+    - filter Results based on:
+       + those already seen (i.e. for pops, the one 'short').
+       + if browse, number of Glus in stock for that tag.
+    - insert short into top X pops, sorting by popularity.
+    - create without-domain-name Query and ??  (backfill?)
+-}
 evalQuery :: Query -> Domain -> ResultSet
 evalQuery q d =
     ResultSet (take 1 shortResults ++ take 20 popResults)
     where
-      shortResults = eval' idQ (getShortResults d) cmpId
-      popResults   = eval' idQ (getPopResults   d) cmpPop
+      shortResults = eval' idQ getShortResults d cmpId
+      popResults   = eval' idQ getPopResults   d cmpPop
       idQ = forDomain q d
 
 -------------
@@ -38,16 +47,29 @@ forDomain (Leaf (Lexeme s)) d@(Domain _ lexicon _ _ _) =
     Leaf (LexemeIds $ getLexemeIds lexicon s)
       
 eval' :: Query
-         -> ([Int] -> [Result])              -- fetch postings
+         -> (Domain -> [Int] -> [Result])    -- fetch postings
+         -> Domain
          -> (Result -> Result -> Ordering)   -- order Results
          -> [Result]
-eval' EmptyQuery _ _ = []
-eval' (And l r) fetch cmp =
-    ordIntersectNubBy cmp (eval' l fetch cmp) (eval' r fetch cmp)
-eval' (Or  l r) fetch cmp =
-    ordMergeNubBy     cmp (eval' l fetch cmp) (eval' r fetch cmp)
-eval' (Leaf (LexemeIds lxmIds)) fetch _ = fetch lxmIds
-eval' (Not q)   fetch cmp = undefined
+
+eval' EmptyQuery _ _ _ = []
+
+eval' (And l r) fetch dom cmp =
+    ordIntersectNubBy cmp (eval' l fetch dom cmp) (eval' r fetch dom cmp)
+
+eval' (Or  l r) fetch dom cmp =
+    ordMergeNubBy     cmp (eval' l fetch dom cmp) (eval' r fetch dom cmp)
+
+eval' (Leaf (LexemeIds lxmIds)) fetch dom _ =
+    fetch dom lxmIds
+
+eval' (Not q) fetch dom@(Domain _ _ _ resultTbl _) cmp =
+    ordDiffBy cmp allRes notRes
+    where
+      allRes = mapMaybe (getResult resultTbl) [1..maxId]
+      notRes = eval' q fetch dom cmp
+      maxId  = getMaxId resultTbl
+    
 
 {-
   Called 'qLex' because Prelude contains 'lex', too.

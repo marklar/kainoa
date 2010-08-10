@@ -27,15 +27,6 @@ openDomain dir = do
   tagTbl    <- openTagTbl    dir
   return $ Domain dir lexicon matrix resultTbl tagTbl
 
-{-
-  Currently, filtering it by 'notShort'.  In other words, don't repeat.
-  However, also need to filter:
-    + if faux result, and already seen (i.e. 'short')
-    + if browse domain, and too few glus in stock.
-      - get tags for result.  (theres a TagTbl for that.)
-      - calc avail glus for those tags.
--}
-
 -- For a single lexeme.
 getShortResults :: Domain -> [Int] -> [Result]
 getShortResults (Domain _ _ matrix resultTbl _) lexemeIds =

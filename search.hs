@@ -15,7 +15,8 @@ main = do
   let query = makeQuery (unwords lexemes)
   domains <- mapM openDomain ["idx/browse", "idx/games", "idx/music"]
   let resSet = map (evalQuery query) domains
-  putStrLn . show $ parList resSet resSet
+  -- putStrLn . show $ parList resSet resSet
+  putStrLn $ show resSet
 
 
 parList :: [a] -> b -> b

@@ -6,6 +6,7 @@ module Kainoa.ResultTbl
 , getText
 , getTargets
 , getResultsForTarget
+, getMaxId
 ) where
 
 import System.IO.Posix.MMap.Lazy (unsafeMMapFile)
@@ -58,3 +59,6 @@ getTargets (ResultTbl _ _ _ targetsTbl _ _ _) id =
 getResultsForTarget :: ResultTbl -> Int -> V.Vector Int32
 getResultsForTarget (ResultTbl _ _ _ _ targetsIdxTbl _ _) targetId =
     getIntsFromIdxTbl targetsIdxTbl targetId
+
+getMaxId :: ResultTbl -> Int
+getMaxId (ResultTbl _ _ _ _ _ _ maxId) = maxId

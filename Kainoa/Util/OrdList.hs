@@ -7,6 +7,8 @@ module Kainoa.Util.OrdList
 , ordIntersectNubBy
 , ordMergeNub
 , ordIntersectNub
+, ordDiff
+, ordDiffBy
 ) where
 
 -- Eliminates duplicate entries from the list, where duplication is defined
@@ -56,3 +58,15 @@ ordIntersectNubBy cmp xs@(x:xs') ys@(y:ys') =
       LT ->     ordIntersectNubBy cmp xs' ys
       GT ->     ordIntersectNubBy cmp xs  ys'
       EQ -> x : ordIntersectNubBy cmp xs' ys'
+
+ordDiff :: (Eq a, Ord a) => [a] -> [a] -> [a]
+ordDiff = ordDiffBy compare
+
+ordDiffBy :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
+ordDiffBy _ [] _  = []
+ordDiffBy _ xs [] = xs
+ordDiffBy cmp xs@(x:xs') ys@(y:ys') =
+    case cmp x y of
+      LT -> x : ordDiffBy cmp xs' ys
+      GT ->     ordDiffBy cmp xs  ys'
+      EQ ->     ordDiffBy cmp xs' ys'
