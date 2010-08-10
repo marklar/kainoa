@@ -5,40 +5,45 @@ import Data.Int (Int32)
 import qualified Data.Vector.Storable as V
 import Data.List (intercalate)
 
+data LexemeInfo = Lexeme String
+                | LexemeIds [Int]
+                  deriving (Show)
+
+data Query = And  Query Query
+           | Or   Query Query
+           | Not  Query
+           | Leaf LexemeInfo
+           | EmptyQuery
+             deriving (Show)
+
 data Domain = Domain String Lexicon Matrix ResultTbl (Maybe TagTbl)
 
 data Lexicon = Lexicon IntsV StrTbl Int
 
--- Use these structs for structural typing.
--- Can create a new Matrix by simply using {resIds = foo, popIds = bar}.
 data Matrix = Matrix
-    { resIds :: IntsTbl
-    , popIds :: IntsTbl
-    }
+              IntsTbl -- resIds
+              IntsTbl -- popIds
 
 data ResultTbl = ResultTbl 
-    { pops       :: IntsV
-    , popsIdx    :: IntsV
-    , texts      :: StrTbl
-    , targets    :: IntsTbl
-    , targetsIdx :: IntsIdxTbl
-    , isFauxV    :: Maybe BoolV
-    , numResults :: Int
-    }
+                 IntsV         -- pop
+                 IntsV         -- popIdx
+                 StrTbl        -- text
+                 IntsTbl       -- targets
+                 IntsIdxTbl    -- targetIdx
+                 (Maybe BoolV) -- isFaux
+                 Int           -- numResults
 
 data TagTbl = TagTbl
-    { typeIds   :: IntsV
-    , availGlus :: IntsV
-    , totalGlus :: IntsV
-    , numTags   :: Int
-    }
+              IntsV -- typeIds
+              IntsV -- availGlus
+              IntsV -- totalGlus
+              Int   -- numTags
 
 data Tag = Tag
-    { tagId    :: Int
-    , tagName  :: String
-    , tagAvail :: Int
-    , tagTotal :: Int
-    }
+           Int    -- id
+           String -- name
+           Int    -- avail
+           Int    -- total
 
 data Result = Result Int Int String (V.Vector Int32)
             deriving (Eq)

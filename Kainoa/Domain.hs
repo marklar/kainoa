@@ -1,6 +1,7 @@
 module Kainoa.Domain
 ( openDomain
-, getResults
+, getShortResults
+, getPopResults
 ) where
 
 import qualified Data.Vector.Storable as V
@@ -26,15 +27,6 @@ openDomain dir = do
   tagTbl    <- openTagTbl    dir
   return $ Domain dir lexicon matrix resultTbl tagTbl
 
-getResults :: Domain -> String -> ResultSet
-getResults domain@(Domain _ lexicon _ _ _) lexeme =
-    ResultSet (shortResults ++ popResults)
-    where
-      shortResults = take 1  $ getShortResults domain lexemeIds
-      popResults   = take 20 $ filter notShort $ getPopResults domain lexemeIds
-      notShort r = r `notElem` shortResults
-      lexemeIds = getLexemeIds lexicon lexeme
-
 {-
   Currently, filtering it by 'notShort'.  In other words, don't repeat.
   However, also need to filter:
@@ -44,12 +36,14 @@ getResults domain@(Domain _ lexicon _ _ _) lexeme =
       - calc avail glus for those tags.
 -}
 
+-- For a single lexeme.
 getShortResults :: Domain -> [Int] -> [Result]
 getShortResults (Domain _ _ matrix resultTbl _) lexemeIds =
     mapMaybe (getResult resultTbl) resultIds
     where
       resultIds = getResultIds (getIds matrix) lexemeIds
 
+-- For a single lexeme.
 getPopResults :: Domain -> [Int] -> [Result]
 getPopResults (Domain _ _ matrix resultTbl _) lexemeIds =
     mapMaybe (getResult resultTbl) resultIds

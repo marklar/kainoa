@@ -3,6 +3,8 @@ module Kainoa.Util.OrdList
 , ordNub
 , ordMergeBy
 , ordMerge
+, ordMergeNubBy
+, ordIntersectNubBy
 , ordMergeNub
 , ordIntersectNub
 ) where
@@ -41,7 +43,7 @@ ordMergeNubBy cmp xs@(x:xs') ys@(y:ys') =
    case cmp x y of
      LT -> x : ordMergeNubBy cmp xs' ys
      EQ -> x : ordMergeNubBy cmp xs' ys' 
-     GT -> y : ordMergeNubBy cmp xs ys'
+     GT -> y : ordMergeNubBy cmp xs  ys'
 
 ordIntersectNub :: (Eq a, Ord a) => [a] -> [a] -> [a]
 ordIntersectNub = ordIntersectNubBy compare
