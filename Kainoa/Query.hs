@@ -45,6 +45,7 @@ forDomain (And l r) d  = And (forDomain l d) (forDomain r d)
 forDomain (Or  l r) d  = Or  (forDomain l d) (forDomain r d)
 forDomain (Leaf (Lexeme s)) d@(Domain _ lexicon _ _ _) =
     Leaf (LexemeIds $ getLexemeIds lexicon s)
+forDomain lf _ = lf
       
 eval' :: Query
          -> (Domain -> [Int] -> [Result])    -- fetch postings
@@ -55,10 +56,12 @@ eval' :: Query
 eval' EmptyQuery _ _ _ = []
 
 eval' (And l r) fetch dom cmp =
-    ordIntersectNubBy cmp (eval' l fetch dom cmp) (eval' r fetch dom cmp)
+    ordIntersectNubBy cmp (e' l) (e' r)
+    where e' q = eval' q fetch dom cmp
 
 eval' (Or  l r) fetch dom cmp =
-    ordMergeNubBy     cmp (eval' l fetch dom cmp) (eval' r fetch dom cmp)
+    ordMergeNubBy cmp (e' l) (e' r)
+    where e' q = eval' q fetch dom cmp
 
 eval' (Leaf (LexemeIds lxmIds)) fetch dom _ =
     fetch dom lxmIds
@@ -69,7 +72,10 @@ eval' (Not q) fetch dom@(Domain _ _ _ resultTbl _) cmp =
       allRes = mapMaybe (getResult resultTbl) [1..maxId]
       notRes = eval' q fetch dom cmp
       maxId  = getMaxId resultTbl
-    
+
+eval' strLeaf fetch dom cmp =
+    eval' idsLeaf fetch dom cmp
+    where idsLeaf = forDomain strLeaf dom
 
 {-
   Called 'qLex' because Prelude contains 'lex', too.
