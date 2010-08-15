@@ -2,6 +2,9 @@ module Kainoa.Domain
 ( openDomain
 , getShortResults
 , getPopResults
+, getShortIds
+, getPopIds
+, getMaxResId
 ) where
 
 import qualified Data.Vector.Storable as V
@@ -12,7 +15,7 @@ import Data.Maybe (mapMaybe)
 import Data.Int (Int32)
 
 import Kainoa.Types
-import Kainoa.ResultTbl (openResultTbl, getResult, getResultIdForPop)
+import Kainoa.ResultTbl (openResultTbl, getResult, getResultIdForPop, getMaxId)
 import Kainoa.Matrix (openMatrix, getIds, getPops)
 import Kainoa.Lexicon (openLexicon, getLexemeIds)
 import Kainoa.TagTbl (openTagTbl)
@@ -27,6 +30,22 @@ openDomain dir = do
   tagTbl    <- openTagTbl    dir
   return $ Domain dir lexicon matrix resultTbl tagTbl
 
+getMaxResId :: Domain -> Int
+getMaxResId (Domain _ _ _ resultTbl _) =
+    getMaxId resultTbl
+
+------
+
+getShortIds :: Domain -> [Int] -> [Int]
+getShortIds (Domain _ _ matrix _ _) lexemeIds =
+    getResultIds (getIds matrix) lexemeIds
+
+getPopIds :: Domain -> [Int] -> [Int]
+getPopIds (Domain _ _ matrix _ _) lexemeIds =
+    getResultIds (getPops matrix) lexemeIds
+
+------
+    
 -- For a single lexeme.
 getShortResults :: Domain -> [Int] -> [Result]
 getShortResults (Domain _ _ matrix resultTbl _) lexemeIds =

@@ -11,8 +11,10 @@ module Kainoa.Util.OrdList
 , ordDiffBy
 ) where
 
--- Eliminates duplicate entries from the list, where duplication is defined
--- by the 'eq' function.  The last value is kept.
+{-
+  Eliminates duplicate entries from the list, where duplication is defined
+  by the 'eq' function.  Keeps first value.
+-}
 ordNubBy :: (a -> a -> Bool) -> [a] -> [a]
 ordNubBy eq (x1 : xs@(x2 : _)) =
    if eq x1 x2 then ordNubBy eq xs else x1 : ordNubBy eq xs
@@ -20,9 +22,13 @@ ordNubBy _ xs = xs
  
 ordNub :: (Eq a) => [a] -> [a]
 ordNub = ordNubBy (==)
- 
- -- Merge two ord lists into a new ord list.  Where elements are equal
- -- the element from the first list is taken first.
+
+-----
+
+{- 
+   Merge two ord lists into a new ord list.  Where elements are equal
+   the element from the first list is taken first.
+-}
 ordMergeBy :: (a -> a -> Ordering) -> [a] -> [a] -> [a]
 ordMergeBy _ [] ys = ys
 ordMergeBy _ xs [] = xs
@@ -47,6 +53,8 @@ ordMergeNubBy cmp xs@(x:xs') ys@(y:ys') =
      EQ -> x : ordMergeNubBy cmp xs' ys' 
      GT -> y : ordMergeNubBy cmp xs  ys'
 
+-----
+
 ordIntersectNub :: (Eq a, Ord a) => [a] -> [a] -> [a]
 ordIntersectNub = ordIntersectNubBy compare
 
@@ -58,6 +66,8 @@ ordIntersectNubBy cmp xs@(x:xs') ys@(y:ys') =
       LT ->     ordIntersectNubBy cmp xs' ys
       GT ->     ordIntersectNubBy cmp xs  ys'
       EQ -> x : ordIntersectNubBy cmp xs' ys'
+
+-----
 
 ordDiff :: (Eq a, Ord a) => [a] -> [a] -> [a]
 ordDiff = ordDiffBy compare
