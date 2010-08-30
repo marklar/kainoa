@@ -1,0 +1,30 @@
+Is there a way to speed up the evaluation of the Query
+by using state?
+
+In the ML version, we hold state in two places.
+
+[1] We have a single closure at the "top" of the tree
+which keeps a reference to the previous result.
+Each time we call that fun, it knows to ask the tree
+for the next value *greater* than the previous result.
+
+That wouldn't have to be done with a reference.
+We could, instead, recursively call the tree's iter funs,
+using our stack to store the last returned value.
+
+[2] In each leaf node, we store:
+  - the last value returned
+  - our idx into the ary
+This is merely an optimization; without storing such
+info, we could still find the next value greater than X.
+It's just that we can find it so much more quickly if
+we know where to start looking.
+
+For each node in the tree, we pass in the minimum
+result we'd like.
+
+
+So, the difference may be that in the ML version,
+we're maintaining better locality.  Each time we
+as a subnode for a value, it's not merely the *next* one,
+it's the next one greater than some X.

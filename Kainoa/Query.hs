@@ -8,11 +8,8 @@ import Data.Maybe (mapMaybe)
 
 import Kainoa.Types
 import Kainoa.Util.OrdList (ordIntersectNubBy, ordMergeNubBy, ordDiffBy)
--- import Kainoa.Domain (getShortResults, getPopResults)
 import Kainoa.Domain (getShortIds, getPopIds, getMaxResId)
 import Kainoa.Lexicon (getLexemeIds)
--- import Kainoa.Result (cmpId, cmpPop)
-import Kainoa.Result (getId, getPop, cmpRes)
 import Kainoa.ResultTbl (getResult, getResultIdForPop, getMaxId)
 import Data.Maybe (fromJust)
 
@@ -35,11 +32,12 @@ evalQuery :: Query -> Domain -> ResultSet
 evalQuery q d@(Domain _ _ _ resultTbl _) =
     ResultSet (take 1 shortResults ++ take 20 popResults)
     where
-      shortResults = map (fromJust . getResult resultTbl) shortIds
-      popResults = map (fromJust . getResult resultTbl) popIds
-      shortIds = eval' lxmIdQ (getShortIds d) 0 maxId
-      popIds   = mapMaybe (getResultIdForPop resultTbl) $
-                 eval' lxmIdQ (getPopIds   d) 0 maxId
+      shortResults = mapRes shortResIds
+      popResults = mapRes popResIds
+      shortResIds = eval' lxmIdQ (getShortIds d) 0 maxId
+      popResIds = mapMaybe (getResultIdForPop resultTbl) $
+                  eval' lxmIdQ (getPopIds   d) 0 maxId
+      mapRes = map (fromJust . getResult resultTbl)
       lxmIdQ = forDomain q d
       maxId = getMaxResId d
 
@@ -58,6 +56,16 @@ forDomain (Leaf (Lexeme s)) d@(Domain _ lexicon _ _ _) =
 forDomain lf _ = lf
       
 ------
+
+{-
+  I think what's needed is a "next" fun.
+  Returns a single Int, not [Int].
+  Give me first value >X.
+
+  For each value we want, we call
+  the top-level function WITH A NEW minId,
+  based on previous.
+-}
 
 eval' :: Query
          -> ([Int] -> [Int]) -- idFetcher (LxmIds -> PostingIds)
@@ -78,8 +86,10 @@ eval' (Or  l r) fetch minId maxId =
     ordMergeNubBy compare (e' l) (e' r)
     where e' q = eval' q fetch minId maxId
 
-eval' (Leaf (LexemeIds lxmIds)) fetch _ _ =
-    fetch lxmIds
+-- MODIFY HERE?
+-- Faster if use minId?
+eval' (Leaf (LexemeIds lxmIds)) fetch minId _ =
+    dropWhile (< minId) (fetch lxmIds)
 
 eval' (Not q) fetch minId maxId =
     ordDiffBy compare allIds notIds
@@ -93,10 +103,6 @@ eval' (Not q) fetch minId maxId =
   before attempting to eval.
 -}
 eval' strLeaf fetch minId maxId = undefined
-{-
-    eval' idsLeaf fetch dom (cmpRes get) minId
-    where idsLeaf = forDomain strLeaf dom
--}
 
 {-
   Called 'qLex' because Prelude contains 'lex', too.

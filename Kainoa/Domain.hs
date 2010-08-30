@@ -1,17 +1,13 @@
 module Kainoa.Domain
 ( openDomain
-, getShortResults
-, getPopResults
+, getMaxResId
 , getShortIds
 , getPopIds
-, getMaxResId
 ) where
 
 import qualified Data.Vector.Storable as V
+import qualified Data.Vector.Generic.Mutable as GV
 import System.Environment
-import Control.Monad (liftM)
-import Data.List (concat, nub, sort)
-import Data.Maybe (mapMaybe)
 import Data.Int (Int32)
 
 import Kainoa.Types
@@ -36,6 +32,15 @@ getMaxResId (Domain _ _ _ resultTbl _) =
 
 ------
 
+{-
+  Instead of returning [Int],
+  merge the multiple (V.Vector Int32)s
+  into a single Mutable Vector.
+  http://hackage.haskell.org/packages/archive/vector/0.5/doc/html/Data-Vector-Storable-Mutable.html
+  The function 'write' allows one to replace a value
+  at a given spot.
+-}
+
 getShortIds :: Domain -> [Int] -> [Int]
 getShortIds (Domain _ _ matrix _ _) lexemeIds =
     getResultIds (getIds matrix) lexemeIds
@@ -45,21 +50,6 @@ getPopIds (Domain _ _ matrix _ _) lexemeIds =
     getResultIds (getPops matrix) lexemeIds
 
 ------
-    
--- For a single lexeme.
-getShortResults :: Domain -> [Int] -> [Result]
-getShortResults (Domain _ _ matrix resultTbl _) lexemeIds =
-    mapMaybe (getResult resultTbl) resultIds
-    where
-      resultIds = getResultIds (getIds matrix) lexemeIds
-
--- For a single lexeme.
-getPopResults :: Domain -> [Int] -> [Result]
-getPopResults (Domain _ _ matrix resultTbl _) lexemeIds =
-    mapMaybe (getResult resultTbl) resultIds
-    where
-      resultIds = mapMaybe (getResultIdForPop resultTbl) popIds
-      popIds = getResultIds (getPops matrix) lexemeIds
 
 getResultIds :: (Int -> V.Vector Int32) -> [Int] -> [Int]
 getResultIds postingsFetcher lexemeIds =
@@ -68,3 +58,36 @@ getResultIds postingsFetcher lexemeIds =
       otherwise -> map toInt $ foldl1 ordMergeNub resIdLists
     where
       resIdLists = map (V.toList . postingsFetcher) lexemeIds
+
+{-
+  When doing a query like 's xy', where neither token requires merging,
+  but where 's' has many postings and 'xy' has very few,
+  the query takes a long time.  So, it's not a problem with merging.
+  It's a problem of having to go through all the 's' postings
+  while intersecting, and that takes a long time.
+
+  getIds matrix lxmId
+    returns a Vector of postings, lazily
+    if you apply V.toList, then does it create the list lazily (or non-)?
+
+  So where is it spending time?
+  How to make this faster?
+-}
+
+{-
+-- Non-lazily create union?  Wasted cycles?
+getResultIds2 :: (Int -> V.Vector Int32) -> [Int] -> GV.Vector Int32
+getResultIds2 postingsFetcher lexemeIds = do
+  case resIdLists of
+    [] -> GV.new 0
+    otherwise -> do
+        v <- GV.new maxLen
+        merge v 0
+        GV.unsafeFreeze v
+      where
+        resIdVectors = map postingsFetcher lexemeIds
+        fill v i = do
+                    let x = nextValue in
+                    GV.unsafeWrite v i x
+                    fill v (i+1)
+-}

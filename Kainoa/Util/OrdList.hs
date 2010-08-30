@@ -11,6 +11,7 @@ module Kainoa.Util.OrdList
 , ordDiffBy
 ) where
 
+
 {-
   Eliminates duplicate entries from the list, where duplication is defined
   by the 'eq' function.  Keeps first value.
