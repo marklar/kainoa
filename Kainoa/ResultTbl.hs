@@ -1,3 +1,12 @@
+{- |
+
+Data about the results.
+
+This is not for finding matches.
+Rather, it's for returning the data associated with the matches.
+
+-}
+
 module Kainoa.ResultTbl
 ( openResultTbl
 , getResult

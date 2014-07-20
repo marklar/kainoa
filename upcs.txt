@@ -1,0 +1,49 @@
+
+Only 34 (out of 7+ million) UPCs do *not* start with '978'.
+
+= UPCs =
+
+results table
+ - each result: always a single lxm
+
+the lexicon
+ - all lxm are (roughly) same length
+ - no lxm is a sub- or superstring of another
+ - each lxm appears in only one result
+
+matrix
+ - each set of result_ids is of cardinality 1
+
+
+however...
+
+query results
+ - always want only by-popularity sort
+ - don't care about lexical rank
+ - don't care about similarity sorting
+
+query tree
+ - always only a single node.  (no and/or/not.)
+ - no need to store entire set of matches per lxm;
+   store only 5 res_ids for each lxm!
+
+
+alt version of dump_usages.ml
+ - create multiple variants per UPC:
+    978465452189
+    97846
+    9784
+    978
+    97
+    9
+ - the resultant file will be HUGE (~40M entries).
+
+alt version of matrix_mkr.ml
+ - no 'lexes_col' necessary.
+ - but then also need alt matrix.ml
+
+create alt version of usages_file_rdr.ml
+ - write_gloss() should keep only the top X (five?) pop
+ - use prio_queue.ml to implement.
+
+   

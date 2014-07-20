@@ -1,3 +1,33 @@
+{- |
+
+Kainoa may search over multiple indices, each of which corresponds to
+some set of things we may wish to search over.
+
+Typically, there's one index per product vertical, e.g.
+
+  + the titles of DVDs (e.g. "Emergency on Planet Earth"), or
+  + the names of smartphones (e.g. "Apple iPhone 4")
+
+But there are also indices for such things as:
+
+  + names of charities (to which to donate), or
+  + names of categories of products (e.g. "hockey games")
+
+A Domain represents a single index, which is composed of multiple
+parts (each described in more detail elsewhere):
+
+  + Lexicon : find matching terms
+  + Matrix : for terms, find matching results
+  + ResultTable : for matching results, get corresponding data
+  + TagTbl : addition result information, corresponding to MySQL DB data
+
+The Domain module has two principle jobs:
+  1. to provide tables for calculating a list of result IDs, and
+  2. to filter the results for uniqueness of referent to create
+     a displayable result set.
+
+-}
+
 module Kainoa.Domain
 ( openDomain
 , getMaxResId

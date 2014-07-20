@@ -1,3 +1,14 @@
+{- |
+
+The Lexicon we use to find query lexemes.
+
+The data structure is complicated.  We store the lexemes (words) in an
+on-disk hash-table of ordered sets.
+
+The logic for finding the strings is non-trivial (but time-honored).
+
+-}
+
 module Kainoa.Lexicon
 ( openLexicon
 , getLexemeIds

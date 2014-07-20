@@ -1,0 +1,70 @@
+
+== Configuration ==
+
+Maiele has two configuration files:
+  * cfg/config.yml      : mostly what indices to use
+  * cfg/conflations.txt : for treating sets of lexemes equivalently
+
+=== Config.yml ==
+
+What: The easiest way to see what config info is available is to look
+at the interface specification of the Cfg module (i.e. src/cfg.mli).
+Most importantly, it provides info about what indices are available to
+search against.
+
+How: Configuration of Maiele is done with the use of YAML files.  But
+the Maiele executables do not use the YAML files directly, because the
+OCaml library for working with YAML was (IMO) difficult to work with.
+
+A Ruby script called script/yaml_2_json.rb is used to:
+
+  * Augment the config data, adding info about what searchable indices
+    exist.
+
+  * Convert the config data from YAML into JSON, putting it into a
+    "hidden" file beginning with a '.', so that people aren't tempted
+    to use it directly.
+
+Then the OCaml executables use the JSON config data, reading it in and
+making it available to the rest of the code in the Cfg module
+(src/cfg.ml).  At the end of that source file, there is a comment of
+some example config data in JSON format, pretty-printed for
+readability.
+
+The Cfg module uses a third-party library called "json-wheel" for
+interpreting JSON data.  The code is simple but ain't pretty -- the
+code in module Cfg must be written with knowledge of exactly what to
+find in the JSON data.
+
+Once read into OCaml data structures, the config data is available
+from the Cfg module as simple values.
+
+=== Conflations ===
+
+Conflations are a powerful but dangerous tool.  By providing a set of
+words to be treated as equivalent (e.g. "12th" and "twelfth"), one can
+expand the set of matching results in ways both positive and negative.
+
+For example, a user may be happy to see "Twelfth Night" when typing
+"12th Night".
+
+However, a user may be confused to see a result with "twelfth" after
+typing just "1".  (Somewhat akin to a problem known as the "Cupertino
+effect" [http://en.wikipedia.org/wiki/Cupertino_effect].)
+
+The "synonyms" in cfg/conflations.txt is read into a Hashtbl in the
+Conflator module (src/conflator.ml) and its content is exposed as a
+function (because we provide read-only access to it):
+
+  * Conflator.conflations : string -> string list
+
+These conflations are then used at two different times:
+
+  * During indexing, in the executable "dump_postings".  A posting is
+    created for each lexeme *and* the its conflations.
+
+  * During emboldening, to construct the regular expressions used to
+    find matches and wrap them in "<em>" tags.  If the query contains
+    "12" and a result was matched because it contained "twelve", we'll
+    want to embolden the "twelve".
+

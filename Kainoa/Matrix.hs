@@ -1,3 +1,10 @@
+{- |
+
+Map: lexeme -> ResultIds
+
+
+-}
+
 module Kainoa.Matrix
 ( openMatrix
 , getIds
